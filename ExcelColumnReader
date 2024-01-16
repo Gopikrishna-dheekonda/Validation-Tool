@@ -1,0 +1,52 @@
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+public class ExcelColumnReader {
+    public static void main(String[] args) throws IOException {
+        String filename = "C:\\Users\\gdheekonda\\Desktop\\AIC_Fields_for_France_Complete.xlsx";
+        int columnIndex = 4; // replace 0 with the index of the column you want to extract
+        List<String> columnData = new ArrayList<>();
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(filename);
+            XSSFWorkbook workbook = new XSSFWorkbook(fis);
+            XSSFSheet sheet = workbook.getSheetAt(1);
+            Iterator rows = sheet.rowIterator();
+            while (rows.hasNext()) {
+                XSSFRow row = (XSSFRow) rows.next();
+                XSSFCell cell = row.getCell(columnIndex);
+                if (cell != null) {
+                    columnData.add(cell.toString());
+
+                }
+
+            }
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+
+        } finally {
+
+            if (fis != null) {
+
+                fis.close();
+
+            }
+
+        }
+        int count = 0;
+for (String i:columnData ) {
+    System.out.println(count + " "+ i);
+    count++;
+}
+    }
+
+}
