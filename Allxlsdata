@@ -1,0 +1,35 @@
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.*;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+
+public class Allxlsdata {
+
+    public static void main(String[] args) {
+        try {
+            // Provide the path to your Excel (.xls) file
+            String filePath = "C:\\Users\\gdheekonda\\Desktop\\AIC_Fields_for_France_Complete.xlsx";
+            // Create a FileInputStream to read the Excel file
+            FileInputStream fis = new FileInputStream(new File(filePath));
+            // Create a Workbook object for the Excel file
+            Workbook workbook = new XSSFWorkbook(fis);
+            // Assuming the data is in the first sheet, you can change the sheet index if needed
+            XSSFSheet sheet = (XSSFSheet) workbook.getSheetAt(1);
+            // Iterate through each row and print the data as a table
+            for (Row row : sheet) {
+                for (Cell cell : row) {
+                    System.out.print(cell.toString() + "\t");
+                }
+                System.out.println(); // Move to the next line after each row
+            }
+            // Close the FileInputStream and release resources
+            fis.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
