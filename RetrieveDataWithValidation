@@ -1,0 +1,86 @@
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class RetrieveDataWithValidation {
+
+    public static void main(String[] args) {
+        String oagFilePath = "C:\\Users\\gdheekonda\\Desktop\\VILLE--320623846_FRANCEB2BSUP2_FR_A16005975_FRANCEB2BBUY2_FR_PRS_INVPP1001_04_2024-01-09T00--00--00Z_Native.xml";
+        String xpathsFilePath = "C:\\Users\\gdheekonda\\Desktop\\Xpaths.txt";
+
+        List<String> xpaths = readXPathsFromFile(xpathsFilePath);
+
+        if (xpaths != null) {
+            retrieveAndValidateData(oagFilePath, xpaths);
+        } else {
+            System.out.println("Error reading XPaths from file.");
+        }
+    }
+
+    private static List<String> readXPathsFromFile(String filePath) {
+        List<String> xpaths = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                xpaths.add(line);
+            }
+            return xpaths;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private static void retrieveAndValidateData(String xmlFilePath, List<String> xpaths) {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.parse(xmlFilePath);
+
+            XPathFactory xPathFactory = XPathFactory.newInstance();
+            XPath xpath = xPathFactory.newXPath();
+
+            for (String xpathExpression : xpaths) {
+                try {
+                    XPathExpression expr = xpath.compile(xpathExpression);
+                    Object result = expr.evaluate(document, XPathConstants.NODESET);
+
+                    if (result instanceof NodeList) {
+                        NodeList nodeList = (NodeList) result;
+
+                        if (nodeList.getLength() > 0) {
+                            System.out.println("XPath '" + xpathExpression + "' is valid. Retrieved data:");
+
+                            for (int i = 0; i < nodeList.getLength(); i++) {
+                                System.out.println(nodeList.item(i).getTextContent());
+                            }
+                        } else {
+                            System.out.println("XPath '" + xpathExpression + "' is valid but has no matching nodes.");
+                        }
+                    } else {
+                        System.out.println("Invalid XPath expression: " + xpathExpression);
+                    }
+                } catch (XPathExpressionException e) {
+                    System.out.println("Invalid XPath expression: " + xpathExpression);
+                }
+            }
+        } catch (SAXException | IOException | ParserConfigurationException e) {
+            e.printStackTrace();
+        }
+    }
+}
