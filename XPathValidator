@@ -1,0 +1,78 @@
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
+public class XPathValidator {
+
+    public static void main(String[] args) {
+        try {
+            // Provide the path to your OAG XML file
+            String xmlFilePath = "C:\\Users\\gdheekonda\\Desktop\\VILLE--320623846_FRANCEB2BSUP2_FR_A16005975_FRANCEB2BBUY2_FR_PRS_INVPP1001_04_2024-01-09T00--00--00Z_Native.xml";
+
+            // Provide the path to your file containing 400 XPaths
+            String xpathsFilePath = "C:\\Users\\gdheekonda\\Desktop\\Xpaths.txt";
+
+            // Create a DocumentBuilder to parse the XML file
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.parse(new InputSource(xmlFilePath));
+
+            // Create an XPath object
+            XPath xpath = XPathFactory.newInstance().newXPath();
+
+            // Read XPaths from the file
+            String[] xpaths = readXPathsFromFile(xpathsFilePath);
+
+            // Validate each XPath
+            for (String xpathExpression : xpaths) {
+                validateXPath(xpath, document, xpathExpression);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static String[] readXPathsFromFile(String filePath) throws IOException {
+        // Read XPaths from the file
+        BufferedReader reader = new BufferedReader(new FileReader(filePath));
+        String line;
+        StringBuilder stringBuilder = new StringBuilder();
+
+        while ((line = reader.readLine()) != null) {
+            stringBuilder.append(line).append("\n");
+        }
+
+        reader.close();
+
+        // Split XPaths based on newline character
+        return stringBuilder.toString().split("\n");
+    }
+
+    private static void validateXPath(XPath xpath, Document document, String xpathExpression) throws XPathExpressionException {
+        // Compile the XPath expression
+        XPathExpression expression = xpath.compile(xpathExpression);
+
+        // Evaluate the XPath expression against the document
+        NodeList nodeList = (NodeList) expression.evaluate(document, XPathConstants.NODESET);
+
+        // Output the result
+        System.out.println("XPath: " + xpathExpression);
+        if (nodeList.getLength() > 0) {
+            System.out.println("Result: Present");
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                System.out.println("Node Value: " + nodeList.item(i).getTextContent());
+            }
+        } else {
+            System.out.println("Result: Not Present");
+        }
+        System.out.println();
+    }
+}
